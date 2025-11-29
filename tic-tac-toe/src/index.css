@@ -1,0 +1,259 @@
+:root {
+  --bg: #f6f7fb;
+  --bg-grad-1: #f9fafb;
+  --bg-grad-2: #eef2ff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #111827;
+  --primary-hover: #0f172a;
+  --indigo: #4f46e5;
+  --indigo-bg: #eef2ff;
+  --orange: #ea580c;
+  --orange-bg: #fff7ed;
+  --success: #059669;
+  --card: #ffffff;
+  --card-shadow: rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1000px 400px at 20% 0%, var(--bg-grad-2), var(--bg-grad-1)) fixed;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  background: var(--card);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px var(--card-shadow);
+  padding: 26px;
+  backdrop-filter: saturate(120%) blur(2px);
+  border: 1px solid #f3f4f6;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.mode {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  appearance: none;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.btn--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn--outline {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+}
+
+.btn--block { width: 100%; }
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+@media (min-width: 640px) {
+  .content {
+    flex-direction: row;
+    gap: 32px;
+  }
+}
+
+.left { flex: 1; }
+
+.sidebar {
+  width: 100%;
+  max-width: 260px;
+}
+
+.scoreboard {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.score-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.score-label { color: var(--muted); }
+.score-value { font-size: 20px; font-weight: 800; }
+
+.status {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.status--winner { color: var(--success); }
+.status--draw { color: var(--muted); }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--text);
+  font-size: 28px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  cursor: pointer;
+}
+
+.cell--hover:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+
+.cell--x {
+  color: var(--indigo);
+  border-color: #c7d2fe;
+  background: var(--indigo-bg);
+}
+
+.cell--o {
+  color: var(--orange);
+  border-color: #fed7aa;
+  background: var(--orange-bg);
+}
+
+.cell:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.rules {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+}
+
+.rules-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.rules-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.rules-list li {
+  margin-bottom: 6px;
+}
+
+.instructions {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+}
+
+.instructions-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-left: 20px; /* ordered list indentation */
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.instructions-list li {
+  margin-bottom: 6px;
+}
