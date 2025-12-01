@@ -1,33 +1,48 @@
+// React hooks for state, lifecycle effects, and memoized values
 import { useEffect, useMemo, useState } from 'react'
 
+// Main application component: manages game state, UI, and AI behavior
 function App() {
+  // Current board dimension (3×3 or 5×5)
   const [boardSize, setBoardSize] = useState(5)
+  // Flat array of cells; each cell is 'X', 'O', or null
   const [board, setBoard] = useState(Array(boardSize * boardSize).fill(null))
+  // Number of consecutive marks required to win (3 for 3×3, 4 for 5×5)
   const winLength = boardSize === 3 ? 3 : 4
+  // Whose turn it is: true → X, false → O
   const [isXNext, setIsXNext] = useState(true)
+  // The winner ('X' or 'O'), or null if no winner yet
   const [winner, setWinner] = useState(null)
+  // Whether the current round is a draw (board full with no winner)
   const [isDraw, setIsDraw] = useState(false)
+  // Game mode: player vs player ('pvp') or player vs AI ('ai')
   const [mode, setMode] = useState('pvp') // 'pvp' | 'ai'
+  // Scoreboard accumulated across rounds
   const [scores, setScores] = useState({ X: 0, O: 0 })
 
+  // Recompute winner and draw status whenever the board changes
   useEffect(() => {
     const w = computeWinner(board, boardSize, winLength)
     setWinner(w)
+    // Draw: no winner and no empty cells
     setIsDraw(!w && board.every((c) => c !== null))
   }, [board, boardSize, winLength])
 
+  // When a winner is determined, increment their score
   useEffect(() => {
     if (winner) {
       setScores((prev) => ({ ...prev, [winner]: prev[winner] + 1 }))
     }
   }, [winner])
 
+  // In AI mode, let the computer play as 'O' on its turn
   useEffect(() => {
     if (mode !== 'ai') return
     if (winner || isDraw) return
     if (isXNext) return
 
     const timer = setTimeout(() => {
+      // Choose a smart move for 'O' based on heuristic scoring
       const idx = getSmartAiMove(board, boardSize, winLength)
       if (idx == null) return
       const next = [...board]
@@ -39,6 +54,7 @@ function App() {
     return () => clearTimeout(timer)
   }, [board, isXNext, mode, winner, isDraw, boardSize, winLength])
 
+  // Human-readable status line shown above the board
   const statusMessage = useMemo(() => {
     if (winner) return `Winner: Player ${winner} 🎉`
     if (isDraw) return 'It’s a draw. No moves left.'
@@ -46,9 +62,11 @@ function App() {
     return `Player ${isXNext ? 'X' : 'O'}’s Turn`
   }, [winner, isDraw, isXNext, mode])
 
+  // CSS class reflecting winner/draw/normal state
   const statusClass =
     winner ? 'status status--winner' : isDraw ? 'status status--draw' : 'status'
 
+  // Handle a player's click on a cell (ignore invalid clicks)
   const handleCellClick = (index) => {
     if (winner || isDraw) return
     if (board[index] !== null) return
@@ -60,6 +78,7 @@ function App() {
     setIsXNext((prev) => !prev)
   }
 
+  // Reset the current round while keeping the current board size
   const restartGame = () => {
     setBoard(Array(boardSize * boardSize).fill(null))
     setIsXNext(true)
@@ -67,6 +86,7 @@ function App() {
     setIsDraw(false)
   }
 
+  // Switch between PvP and AI modes; start a fresh round
   const changeMode = (newMode) => {
     setMode(newMode)
     // Reset board while preserving current board size
@@ -76,6 +96,7 @@ function App() {
     setIsDraw(false)
   }
 
+  // Change board dimension and start a fresh round (winLength adjusts automatically)
   const changeBoardSize = (newSize) => {
     setBoardSize(newSize)
     setBoard(Array(newSize * newSize).fill(null))
@@ -88,7 +109,8 @@ function App() {
     <div className="app">
       <div className="container">
         <header className="header">
-          <h1 className="title">5x5 Tic-Tac-Toe</h1>
+          {/* Title and controls for mode and board size */}
+          <h1 className="title">Tic-Tac-Toe</h1>
           <div className="mode">
             <button
               className={`btn ${mode === 'pvp' ? 'btn--primary' : 'btn--outline'}`}
@@ -121,6 +143,7 @@ function App() {
 
         <section className="content">
           <div className="left">
+            {/* Status banner and interactive board */}
             <div className={statusClass}>{statusMessage}</div>
             <Board
               board={board}
@@ -131,6 +154,7 @@ function App() {
           </div>
 
           <aside className="sidebar">
+            {/* Scoreboard and helpful information */}
             <div className="scoreboard">
               <h2 className="score-title">Scoreboard</h2>
               <div className="score-item">
@@ -183,6 +207,7 @@ function App() {
   )
 }
 
+// Board component: renders a responsive grid of cells
 function Board({ board, onCellClick, disabled, size }) {
   return (
     <div
@@ -201,6 +226,7 @@ function Board({ board, onCellClick, disabled, size }) {
   )
 }
 
+// Cell component: an interactive button representing a single board cell
 function Cell({ value, onClick, disabled }) {
   const clickable = !disabled && value === null
   const classes = ['cell']
@@ -220,10 +246,10 @@ function Cell({ value, onClick, disabled }) {
   )
 }
 
+// Winner detection: checks for any line of length `winLength`
+// across rows, columns, and both diagonals. Returns 'X', 'O', or null.
 function computeWinner(board, size, winLength) {
-  // Check any 4-in-a-row across rows, columns, and diagonals
-
-  // Rows
+  // Rows: scan contiguous windows of length winLength
   for (let r = 0; r < size; r++) {
     for (let c = 0; c <= size - winLength; c++) {
       const i0 = r * size + c
@@ -238,7 +264,7 @@ function computeWinner(board, size, winLength) {
     }
   }
 
-  // Columns
+  // Columns: scan vertical windows
   for (let c = 0; c < size; c++) {
     for (let r = 0; r <= size - winLength; r++) {
       const i0 = r * size + c
@@ -253,7 +279,7 @@ function computeWinner(board, size, winLength) {
     }
   }
 
-  // Diagonal down-right
+  // Diagonal down-right: scan along (r+1, c+1)
   for (let r = 0; r <= size - winLength; r++) {
     for (let c = 0; c <= size - winLength; c++) {
       const i0 = r * size + c
@@ -268,7 +294,7 @@ function computeWinner(board, size, winLength) {
     }
   }
 
-  // Diagonal down-left
+  // Diagonal down-left: scan along (r+1, c-1)
   for (let r = 0; r <= size - winLength; r++) {
     for (let c = winLength - 1; c < size; c++) {
       const i0 = r * size + c
@@ -286,6 +312,7 @@ function computeWinner(board, size, winLength) {
   return null
 }
 
+// Smart AI: prefers immediate win, blocks threats, otherwise uses heuristics
 function getSmartAiMove(board, size, winLength) {
   // 1) Try winning move
   const winMove = findImmediateMove(board, size, winLength, 'O')
@@ -318,6 +345,7 @@ function getSmartAiMove(board, size, winLength) {
   return bestIdx
 }
 
+// Try every empty cell: if placing `player` there wins immediately, choose it
 function findImmediateMove(board, size, winLength, player) {
   for (let i = 0; i < board.length; i++) {
     if (board[i] !== null) continue
@@ -329,6 +357,9 @@ function findImmediateMove(board, size, winLength, player) {
   return null
 }
 
+// Heuristic evaluation of placing 'O' at `idx`:
+// - Rewards building O chains and proximity to center
+// - Penalizes strong X chains (defensive play)
 function evaluateCell(board, size, winLength, idx, centerIndex) {
   // Place O hypothetically at idx for scoring
   const directions = [
@@ -350,7 +381,7 @@ function evaluateCell(board, size, winLength, idx, centerIndex) {
 
   // For each direction, scan windows of length winLength that include idx
   for (const [dr, dc] of directions) {
-    // windows where idx is within the window: start offset t from -(winLength-1) to 0
+    // Windows where idx is within the window: start offset t from -(winLength-1) to 0
     for (let t = -(winLength - 1); t <= 0; t++) {
       let windowCells = []
       let containsIdx = false
@@ -398,6 +429,7 @@ function evaluateCell(board, size, winLength, idx, centerIndex) {
   return score
 }
 
+// Board center index (used to prefer central positions in heuristics)
 function getCenterIndex(size) {
   // For odd sizes, exact center; for even (not used here), nearest center
   const center = Math.floor(size / 2)
